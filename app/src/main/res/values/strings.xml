@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Calculator</string>
+    <string name="title_history">Calculation History</string>
+    <string name="action_clear_history">Clear History</string>
+    <string name="empty_history">No calculations yet</string>
+    <string name="copied_clipboard">Result copied to clipboard</string>
+    <string name="error_division_by_zero">Cannot divide by zero</string>
+    <string name="error_invalid_expression">Invalid format</string>
+</resources>
