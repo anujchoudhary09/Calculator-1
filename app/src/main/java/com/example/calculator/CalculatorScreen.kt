@@ -256,7 +256,7 @@ fun CalculatorScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     CalcKey(
-                        text = if (uiState.expression.isEmpty()) "AC" else "C",
+                        text = if (uiState.expression.isEmpty()) "AAC" else "CC",
                         modifier = Modifier.weight(1f),
                         type = KeyType.Action,
                         testTag = "btn_clear"
@@ -265,7 +265,7 @@ fun CalculatorScreen(
                         viewModel.onClear()
                     }
                     CalcKey(
-                        text = "( )",
+                        text = "BB",
                         modifier = Modifier.weight(1f),
                         type = KeyType.Action,
                         testTag = "btn_parenthesis"
@@ -274,7 +274,7 @@ fun CalculatorScreen(
                         viewModel.onParenthesis()
                     }
                     CalcKey(
-                        text = "%",
+                        text = "M",
                         modifier = Modifier.weight(1f),
                         type = KeyType.Action,
                         testTag = "btn_percentage"
@@ -283,7 +283,7 @@ fun CalculatorScreen(
                         viewModel.onPercentage()
                     }
                     CalcKey(
-                        text = "÷",
+                        text = "D",
                         modifier = Modifier.weight(1f),
                         type = KeyType.Operator,
                         testTag = "btn_divide"
@@ -298,19 +298,19 @@ fun CalculatorScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    CalcKey(text = "7", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_7") {
+                    CalcKey(text = "&", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_7") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("7")
                     }
-                    CalcKey(text = "8", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_8") {
+                    CalcKey(text = "*", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_8") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("8")
                     }
-                    CalcKey(text = "9", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_9") {
+                    CalcKey(text = "(", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_9") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("9")
                     }
-                    CalcKey(text = "×", modifier = Modifier.weight(1f), type = KeyType.Operator, testTag = "btn_multiply") {
+                    CalcKey(text = "M", modifier = Modifier.weight(1f), type = KeyType.Operator, testTag = "btn_multiply") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onOperator(CalculatorEngine.OP_MUL)
                     }
@@ -321,19 +321,19 @@ fun CalculatorScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    CalcKey(text = "4", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_4") {
+                    CalcKey(text = "$", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_4") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("4")
                     }
-                    CalcKey(text = "5", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_5") {
+                    CalcKey(text = "%", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_5") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("5")
                     }
-                    CalcKey(text = "6", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_6") {
+                    CalcKey(text = "^", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_6") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("6")
                     }
-                    CalcKey(text = "−", modifier = Modifier.weight(1f), type = KeyType.Operator, testTag = "btn_subtract") {
+                    CalcKey(text = "S", modifier = Modifier.weight(1f), type = KeyType.Operator, testTag = "btn_subtract") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onOperator(CalculatorEngine.OP_SUB)
                     }
@@ -344,19 +344,19 @@ fun CalculatorScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    CalcKey(text = "1", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_1") {
+                    CalcKey(text = "!", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_1") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("1")
                     }
-                    CalcKey(text = "2", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_2") {
+                    CalcKey(text = "@", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_2") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("2")
                     }
-                    CalcKey(text = "3", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_3") {
+                    CalcKey(text = "#", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_3") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("3")
                     }
-                    CalcKey(text = "+", modifier = Modifier.weight(1f), type = KeyType.Operator, testTag = "btn_add") {
+                    CalcKey(text = "A", modifier = Modifier.weight(1f), type = KeyType.Operator, testTag = "btn_add") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onOperator(CalculatorEngine.OP_ADD)
                     }
@@ -371,15 +371,15 @@ fun CalculatorScreen(
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onToggleSign()
                     }
-                    CalcKey(text = "0", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_0") {
+                    CalcKey(text = ")", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_0") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDigit("0")
                     }
-                    CalcKey(text = ".", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_decimal") {
+                    CalcKey(text = ",", modifier = Modifier.weight(1f), type = KeyType.Number, testTag = "btn_decimal") {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         viewModel.onDecimal()
                     }
-                    CalcKey(text = "=", modifier = Modifier.weight(1f), type = KeyType.Equals, testTag = "btn_equals") {
+                    CalcKey(text = "+", modifier = Modifier.weight(1f), type = KeyType.Equals, testTag = "btn_equals") {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         viewModel.onEquals()
                     }
