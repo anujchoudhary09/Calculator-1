@@ -7,209 +7,229 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 data class CalculatorUiState(
-    val expression: String = "",
-    val previewResult: String = "",
-    val history: List<CalculationHistoryItem> = emptyList(),
-    val isHistoryOpen: Boolean = false,
-    val isResultFinal: Boolean = false,
-    val error: String? = null
+    // Tab Mode (0: Step-by-Step Form Mode, 1: Keypad Mode)
+    val selectedTab: Int = 0,
+
+    // Step-by-Step Form Mode State (Direct 1:1 to your console code)
+    val num1Input: String = "",
+    val num2Input: String = "",
+    val selectedOp: String = "+",
+    val formResult: String? = null,
+    val formExplanation: String? = null,
+    val formError: String? = null,
+
+    // Keypad Mode State (Built using the exact same add, sub, mul, div functions)
+    val keypadDisplay: String = "0",
+    val keypadSubtext: String = "",
+    val keypadFirstNum: Double? = null,
+    val keypadOperator: String? = null,
+    val isEnteringSecondNum: Boolean = false,
+    val keypadError: String? = null
 )
 
-class CalculatorViewModel(
-    private val engine: CalculatorEngine = CalculatorEngine()
-) : ViewModel() {
+class CalculatorViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(CalculatorUiState())
     val uiState: StateFlow<CalculatorUiState> = _uiState.asStateFlow()
 
-    fun onDigit(digit: String) {
-        _uiState.update { state ->
-            val newExpr = if (state.isResultFinal) {
-                digit
-            } else {
-                engine.appendDigit(state.expression, digit)
+    fun selectTab(index: Int) {
+        _uiState.update { it.copy(selectedTab = index) }
+    }
+
+    // -------------------------------------------------------------
+    // Form Mode (Direct mapping of readln() & when(op))
+    // -------------------------------------------------------------
+
+    fun onNum1Change(value: String) {
+        // Allow digits, minus at start, and single decimal point
+        if (value.isEmpty() || value == "-" || value.matches(Regex("^-?\\d*\\.?\\d*$"))) {
+            _uiState.update { it.copy(num1Input = value, formError = null) }
+        }
+    }
+
+    fun onNum2Change(value: String) {
+        if (value.isEmpty() || value == "-" || value.matches(Regex("^-?\\d*\\.?\\d*$"))) {
+            _uiState.update { it.copy(num2Input = value, formError = null) }
+        }
+    }
+
+    fun onOperatorSelect(op: String) {
+        _uiState.update { it.copy(selectedOp = op, formError = null) }
+    }
+
+    fun onCalculateForm() {
+        val s = _uiState.value
+        val a = s.num1Input.toDoubleOrNull()
+        val b = s.num2Input.toDoubleOrNull()
+
+        if (a == null) {
+            _uiState.update { it.copy(formError = "Please enter a valid first number") }
+            return
+        }
+        if (b == null) {
+            _uiState.update { it.copy(formError = "Please enter a valid second number") }
+            return
+        }
+
+        // Call the student's exact logic
+        when (val res = calculate(a, s.selectedOp, b)) {
+            is CalcResult.Success -> {
+                _uiState.update {
+                    it.copy(
+                        formResult = res.formatted,
+                        formExplanation = res.explanation,
+                        formError = null
+                    )
+                }
             }
-            val preview = calculatePreview(newExpr)
-            state.copy(
-                expression = newExpr,
-                previewResult = preview,
-                isResultFinal = false,
-                error = null
+            is CalcResult.Error -> {
+                _uiState.update {
+                    it.copy(
+                        formResult = null,
+                        formExplanation = null,
+                        formError = res.message
+                    )
+                }
+            }
+        }
+    }
+
+    fun onClearForm() {
+        _uiState.update {
+            it.copy(
+                num1Input = "",
+                num2Input = "",
+                selectedOp = "+",
+                formResult = null,
+                formExplanation = null,
+                formError = null
             )
         }
     }
 
-    fun onOperator(op: String) {
+    // -------------------------------------------------------------
+    // Keypad Mode (Interactive keypad using your add/sub/mul/div)
+    // -------------------------------------------------------------
+
+    fun onKeypadDigit(digit: String) {
         _uiState.update { state ->
-            val baseExpr = if (state.isResultFinal && state.previewResult.isNotEmpty()) {
-                state.previewResult
-            } else if (state.expression.isEmpty() && state.previewResult.isNotEmpty()) {
-                state.previewResult
-            } else {
-                state.expression
+            if (state.keypadError != null) {
+                return@update state.copy(
+                    keypadDisplay = digit,
+                    keypadError = null,
+                    isEnteringSecondNum = false
+                )
             }
 
-            val newExpr = engine.appendOperator(baseExpr, op)
-            val preview = calculatePreview(newExpr)
-            state.copy(
-                expression = newExpr,
-                previewResult = preview,
-                isResultFinal = false,
-                error = null
-            )
-        }
-    }
-
-    fun onDecimal() {
-        _uiState.update { state ->
-            val baseExpr = if (state.isResultFinal) "" else state.expression
-            val newExpr = engine.appendDecimal(baseExpr)
-            val preview = calculatePreview(newExpr)
-            state.copy(
-                expression = newExpr,
-                previewResult = preview,
-                isResultFinal = false,
-                error = null
-            )
-        }
-    }
-
-    fun onPercentage() {
-        _uiState.update { state ->
-            val newExpr = engine.appendPercentage(state.expression)
-            val preview = calculatePreview(newExpr)
-            state.copy(
-                expression = newExpr,
-                previewResult = preview,
-                isResultFinal = false,
-                error = null
-            )
-        }
-    }
-
-    fun onParenthesis() {
-        _uiState.update { state ->
-            val baseExpr = if (state.isResultFinal) "" else state.expression
-            val newExpr = engine.appendParenthesis(baseExpr)
-            val preview = calculatePreview(newExpr)
-            state.copy(
-                expression = newExpr,
-                previewResult = preview,
-                isResultFinal = false,
-                error = null
-            )
-        }
-    }
-
-    fun onToggleSign() {
-        _uiState.update { state ->
-            val baseExpr = if (state.isResultFinal && state.previewResult.isNotEmpty()) {
-                state.previewResult
-            } else {
-                state.expression
-            }
-            val newExpr = engine.toggleSign(baseExpr)
-            val preview = calculatePreview(newExpr)
-            state.copy(
-                expression = newExpr,
-                previewResult = preview,
-                isResultFinal = false,
-                error = null
-            )
-        }
-    }
-
-    fun onBackspace() {
-        _uiState.update { state ->
-            if (state.isResultFinal) {
-                state.copy(expression = "", previewResult = "", isResultFinal = false, error = null)
-            } else {
-                val newExpr = engine.backspace(state.expression)
-                val preview = calculatePreview(newExpr)
+            if (state.isEnteringSecondNum) {
                 state.copy(
-                    expression = newExpr,
-                    previewResult = preview,
-                    error = null
+                    keypadDisplay = digit,
+                    isEnteringSecondNum = false
+                )
+            } else {
+                val newDisplay = if (state.keypadDisplay == "0" && digit != ".") {
+                    digit
+                } else if (digit == "." && state.keypadDisplay.contains(".")) {
+                    state.keypadDisplay
+                } else {
+                    state.keypadDisplay + digit
+                }
+                state.copy(keypadDisplay = newDisplay)
+            }
+        }
+    }
+
+    fun onKeypadOperator(op: String) {
+        _uiState.update { state ->
+            val currentVal = state.keypadDisplay.toDoubleOrNull() ?: 0.0
+
+            // If we already had a first number and an operator, calculate partial result first
+            if (state.keypadFirstNum != null && state.keypadOperator != null && !state.isEnteringSecondNum) {
+                when (val res = calculate(state.keypadFirstNum, state.keypadOperator, currentVal)) {
+                    is CalcResult.Success -> {
+                        state.copy(
+                            keypadFirstNum = res.value,
+                            keypadOperator = op,
+                            keypadDisplay = res.formatted,
+                            keypadSubtext = "${res.formatted} $op",
+                            isEnteringSecondNum = true,
+                            keypadError = null
+                        )
+                    }
+                    is CalcResult.Error -> {
+                        state.copy(
+                            keypadError = res.message,
+                            keypadFirstNum = null,
+                            keypadOperator = null
+                        )
+                    }
+                }
+            } else {
+                state.copy(
+                    keypadFirstNum = currentVal,
+                    keypadOperator = op,
+                    keypadSubtext = "${formatNumber(currentVal)} $op",
+                    isEnteringSecondNum = true,
+                    keypadError = null
                 )
             }
         }
     }
 
-    fun onClear() {
-        _uiState.update { state ->
-            state.copy(
-                expression = "",
-                previewResult = "",
-                isResultFinal = false,
-                error = null
-            )
-        }
-    }
+    fun onKeypadEquals() {
+        val state = _uiState.value
+        val firstNum = state.keypadFirstNum ?: return
+        val op = state.keypadOperator ?: return
+        val secondNum = state.keypadDisplay.toDoubleOrNull() ?: return
 
-    fun onEquals() {
-        _uiState.update { state ->
-            if (state.expression.isBlank()) return@update state
-
-            when (val result = engine.evaluate(state.expression)) {
-                is CalculationResult.Success -> {
-                    val historyItem = CalculationHistoryItem(
-                        expression = state.expression,
-                        result = result.formatted
-                    )
-                    state.copy(
-                        expression = result.formatted,
-                        previewResult = "",
-                        history = listOf(historyItem) + state.history,
-                        isResultFinal = true,
-                        error = null
+        when (val res = calculate(firstNum, op, secondNum)) {
+            is CalcResult.Success -> {
+                _uiState.update {
+                    it.copy(
+                        keypadDisplay = res.formatted,
+                        keypadSubtext = "${formatNumber(firstNum)} $op ${formatNumber(secondNum)} =",
+                        keypadFirstNum = null,
+                        keypadOperator = null,
+                        isEnteringSecondNum = true,
+                        keypadError = null
                     )
                 }
-                is CalculationResult.Error -> {
-                    state.copy(
-                        error = result.message,
-                        isResultFinal = false
+            }
+            is CalcResult.Error -> {
+                _uiState.update {
+                    it.copy(
+                        keypadError = res.message,
+                        keypadSubtext = "",
+                        keypadFirstNum = null,
+                        keypadOperator = null
                     )
                 }
             }
         }
     }
 
-    fun toggleHistory() {
-        _uiState.update { it.copy(isHistoryOpen = !it.isHistoryOpen) }
-    }
-
-    fun selectHistoryItem(item: CalculationHistoryItem) {
-        _uiState.update { state ->
-            state.copy(
-                expression = item.result,
-                previewResult = "",
-                isHistoryOpen = false,
-                isResultFinal = true,
-                error = null
+    fun onKeypadClear() {
+        _uiState.update {
+            it.copy(
+                keypadDisplay = "0",
+                keypadSubtext = "",
+                keypadFirstNum = null,
+                keypadOperator = null,
+                isEnteringSecondNum = false,
+                keypadError = null
             )
         }
     }
 
-    fun clearHistory() {
-        _uiState.update { it.copy(history = emptyList(), isHistoryOpen = false) }
-    }
-
-    private fun calculatePreview(expr: String): String {
-        if (expr.isBlank()) return ""
-        val trimmed = expr.trimEnd()
-        // If it ends with an operator, evaluate expression up to operator
-        val lastChar = trimmed.takeLast(1)
-        val testExpr = if (CalculatorEngine.OPERATORS.contains(lastChar)) {
-            trimmed.dropLast(1).trimEnd()
-        } else {
-            trimmed
-        }
-
-        if (testExpr.isBlank()) return ""
-
-        return when (val res = engine.evaluate(testExpr)) {
-            is CalculationResult.Success -> res.formatted
-            is CalculationResult.Error -> ""
+    fun onKeypadBackspace() {
+        _uiState.update { state ->
+            if (state.keypadError != null) {
+                state.copy(keypadDisplay = "0", keypadError = null)
+            } else if (state.keypadDisplay.length <= 1 || (state.keypadDisplay.length == 2 && state.keypadDisplay.startsWith("-"))) {
+                state.copy(keypadDisplay = "0")
+            } else {
+                state.copy(keypadDisplay = state.keypadDisplay.dropLast(1))
+            }
         }
     }
 }
