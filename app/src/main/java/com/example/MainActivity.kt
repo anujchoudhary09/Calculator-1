@@ -16,7 +16,10 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      MyApplicationTheme {
+      MyApplicationTheme(
+    darkTheme = false,
+    dynamicColor = false
+) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
           CalculatorScreen(modifier = Modifier.padding(innerPadding))
         }
