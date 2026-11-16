@@ -545,7 +545,7 @@ private fun KeypadCalculatorView(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     viewModel.onKeypadClear()
                 }
-                Spacer(modifier = Modifier.weight(1f))
+    
                 KeyButton(
                     text = "÷",
                     type = KeyStyle.Operator,
