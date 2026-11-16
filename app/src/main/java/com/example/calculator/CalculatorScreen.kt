@@ -536,6 +536,15 @@ private fun KeypadCalculatorView(
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     viewModel.onKeypadBackspace()
                 }
+                KeyButton(
+                    text = "💣",
+                    type = KeyStyle.Action,
+                    modifier = Modifier.weight(1f),
+                    testTag = "keypad_clear"
+                ) {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    viewModel.onKeypadClear()
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 KeyButton(
                     text = "÷",
