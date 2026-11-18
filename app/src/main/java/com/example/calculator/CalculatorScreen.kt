@@ -100,14 +100,14 @@ fun CalculatorScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Kotlin Calculator",
+                    text = "Coderfluff Calculator",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
             Text(
-                text = "Powered by add(), sub(), mul(), div()",
+                text = "Powered by 💗",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -120,19 +120,8 @@ fun CalculatorScreen(
                 .fillMaxWidth()
                 .widthIn(max = 500.dp)
                 .padding(horizontal = 16.dp, vertical = 4.dp)
-        ) {
-            Tab(
-                selected = uiState.selectedTab == 0,
-                onClick = { viewModel.selectTab(0) },
-                text = { Text("Step-by-Step") },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.FormatListNumbered,
-                        contentDescription = "Step-by-step form mode"
-                    )
-                },
-                modifier = Modifier.testTag("tab_step_by_step")
-            )
+        ) 
+            
             Tab(
                 selected = uiState.selectedTab == 1,
                 onClick = { viewModel.selectTab(1) },
@@ -148,7 +137,7 @@ fun CalculatorScreen(
         }
 
         // Content Area
-        Box(
+    Box(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f)
@@ -156,285 +145,13 @@ fun CalculatorScreen(
             contentAlignment = Alignment.TopCenter
         ) {
             if (uiState.selectedTab == 0) {
-                StepByStepFormView(uiState = uiState, viewModel = viewModel)
-            } else {
                 KeypadCalculatorView(uiState = uiState, viewModel = viewModel)
             }
         }
     }
 }
 
-/**
- * Step-by-Step Mode: Directly maps to the student's console loop:
- *   print("Enter first number: ") -> num1
- *   print("Enter operator (+, -, *, /): ") -> op
- *   print("Enter second number: ") -> num2
- *   when(op) { "+" -> add(), "-" -> sub(), "*" -> mul(), "/" -> div() }
- */
-@Composable
-private fun StepByStepFormView(
-    uiState: CalculatorUiState,
-    viewModel: CalculatorViewModel
-) {
-    val scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .widthIn(max = 480.dp)
-            .verticalScroll(scrollState),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Step 1: First Number
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "1. First number (num1):",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = uiState.num1Input,
-                    onValueChange = { viewModel.onNum1Change(it) },
-                    placeholder = { Text("e.g. 15") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("input_num1")
-                )
-            }
-        }
-
-        // Step 2: Operator Selection (+, -, *, /)
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "2. Operator (op):",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val operators = listOf(
-                        "+" to "add",
-                        "-" to "sub",
-                        "*" to "mul",
-                        "/" to "div"
-                    )
-
-                    operators.forEach { (symbol, name) ->
-                        val isSelected = uiState.selectedOp == symbol
-                        Surface(
-                            onClick = { viewModel.onOperatorSelect(symbol) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(56.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .testTag("op_btn_$symbol"),
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (isSelected) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.surfaceVariant
-                            },
-                            tonalElevation = if (isSelected) 4.dp else 1.dp
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxSize(),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Text(
-                                    text = symbol,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isSelected) {
-                                        MaterialTheme.colorScheme.onPrimary
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    }
-                                )
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (isSelected) {
-                                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Step 3: Second Number
-        ElevatedCard(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            )
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "3. Second number (num2):",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = uiState.num2Input,
-                    onValueChange = { viewModel.onNum2Change(it) },
-                    placeholder = { Text("e.g. 5") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("input_num2")
-                )
-            }
-        }
-
-        // Action Buttons: Calculate & Clear
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = { viewModel.onClearForm() },
-                modifier = Modifier
-                    .weight(1f)
-                    .height(52.dp)
-                    .testTag("btn_form_clear")
-            ) {
-                Icon(imageVector = Icons.Default.Clear, contentDescription = null)
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Clear")
-            }
-
-            Button(
-                onClick = { viewModel.onCalculateForm() },
-                modifier = Modifier
-                    .weight(1.5f)
-                    .height(52.dp)
-                    .testTag("btn_form_calculate"),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(imageVector = Icons.Default.Calculate, contentDescription = null)
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Calculate", fontWeight = FontWeight.Bold)
-            }
-        }
-
-        // Results or Error Display
-        AnimatedVisibility(
-            visible = uiState.formResult != null || uiState.formError != null,
-            enter = fadeIn() + slideInVertically(),
-            exit = fadeOut() + slideOutVertically()
-        ) {
-            if (uiState.formError != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("card_form_error"),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ErrorOutline,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = uiState.formError,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                    }
-                }
-            } else if (uiState.formResult != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("card_form_result"),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Result",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                        )
-                        Text(
-                            text = uiState.formResult,
-                            style = MaterialTheme.typography.displayMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontFamily = FontFamily.Monospace
-                            ),
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        if (uiState.formExplanation != null) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Surface(
-                                shape = RoundedCornerShape(8.dp),
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-                            ) {
-                                Text(
-                                    text = uiState.formExplanation,
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontFamily = FontFamily.Monospace
-                                    ),
-                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * Keypad Mode: An interactive keypad driven by the exact same add, sub, mul, div functions!
- */
 @Composable
 private fun KeypadCalculatorView(
     uiState: CalculatorUiState,
